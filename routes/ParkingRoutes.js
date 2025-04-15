@@ -1,10 +1,7 @@
-// routes/parkingRoutes.js
 const express = require('express');
 const router = express.Router();
-const { updateParkingStatus, getParkingStatus, getParkingBlocks } = require('../controllers/ParkingController');
+const ParkingController = require('../controllers/ParkingController');
 
-router.post('/update', updateParkingStatus);
-router.get('/status', getParkingStatus);
-router.get('/blocks', getParkingBlocks);
+router.post('/update', ParkingController.receiveStatus);
 
 module.exports = router;

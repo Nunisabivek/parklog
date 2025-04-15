@@ -1,24 +1,8 @@
-// models/ParkingSlot.js
 const mongoose = require('mongoose');
 
-const parkingSlotSchema = new mongoose.Schema({
-  block: {
-    type: String,
-    required: true
-  },
-  slotId: {
-    type: Number,
-    required: true
-  },
-  status: {
-    type: String,
-    enum: ['occupied', 'vacant'],
-    default: 'vacant'
-  },
-  updatedAt: {
-    type: Date,
-    default: Date.now
-  }
+const ParkingSlotSchema = new mongoose.Schema({
+  slotId: { type: String, required: true, unique: true },
+  status: { type: String, enum: ['empty', 'occupied', 'error'], default: 'empty' },
 });
 
-module.exports = mongoose.model('ParkingSlot', parkingSlotSchema);
+module.exports = mongoose.model('ParkingSlot', ParkingSlotSchema);
