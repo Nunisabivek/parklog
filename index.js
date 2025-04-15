@@ -22,7 +22,7 @@ mongoose.connect(process.env.MONGO_URI, {
 // Routes
 app.use('/api/parking', parkingRoutes);
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT;
 
 //app.listen(PORT, '0.0.0.0', () => {
    // console.log(`🚀 Server running on http://192.168.29.249:${PORT}`);

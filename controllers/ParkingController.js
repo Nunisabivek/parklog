@@ -25,9 +25,9 @@ exports.getParkingBlocks = async (req, res) => {
     if (institution === 'Assam Down Town University') {
       return res.status(200).json({
         blocks: [
-          { block: 'A', available: 3 },
-          { block: 'B', available: 2 },
-          { block: 'C', available: 1 }
+          { block: 'A', available: 10 },
+          { block: 'B', available: 0 },
+          { block: 'C', available: 0 }
         ]
       });
     } else {
