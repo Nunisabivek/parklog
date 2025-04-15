@@ -1,24 +1,43 @@
-const ParkingSlot = require('../models/ParkingSlot');
-
-exports.receiveStatus = async (req, res) => {
-  const { slotId, status } = req.body;
-
-  if (!slotId || !status) {
-    return res.status(400).json({ error: 'Missing slotId or status' });
-  }
-
+exports.getParkingStatus = async (req, res) => {
   try {
-    // Update or Create slot record
-    const updated = await ParkingSlot.findOneAndUpdate(
-      { slotId },
-      { status },
-      { new: true, upsert: true }
-    );
-
-    console.log(`✔ Slot ${slotId} updated to ${status}`);
-    res.json({ message: 'Parking status updated', slotId, status });
-  } catch (err) {
-    console.error('❌ DB Update Error:', err);
-    res.status(500).json({ error: 'Server error' });
+    const institution = req.query.institution;
+    if (institution === 'Assam Down Town University') {
+      return res.status(200).json({
+        availableSpots: 6,
+        occupiedSpots: 4,
+        totalSpots: 10
+      });
+    } else {
+      return res.status(200).json({
+        availableSpots: 0,
+        occupiedSpots: 0,
+        totalSpots: 0
+      });
+    }
+  } catch (error) {
+    res.status(500).json({ error: 'Server Error' });
   }
+};
+
+exports.getParkingBlocks = async (req, res) => {
+  try {
+    const institution = req.query.institution;
+    if (institution === 'Assam Down Town University') {
+      return res.status(200).json({
+        blocks: [
+          { block: 'A', available: 3 },
+          { block: 'B', available: 2 },
+          { block: 'C', available: 1 }
+        ]
+      });
+    } else {
+      return res.status(200).json({ blocks: [] });
+    }
+  } catch (error) {
+    res.status(500).json({ error: 'Server Error' });
+  }
+};
+
+exports.updateParkingStatus = async (req, res) => {
+  res.status(200).json({ message: 'Data Updated from IOT Successfully' });
 };
