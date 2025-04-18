@@ -18,6 +18,11 @@ mongoose
   .then(() => console.log('✅ Connected to MongoDB'))
   .catch(err => console.error('❌ MongoDB connection error:', err));
 
+  // health check at root
+app.get('/', (req, res) => {
+  res.send('ParkLOG backend 🏷️ is up and running');
+});
+
 // ─── ROUTES ──────────────────────────────────────
 app.use('/api/parking', parkingRoutes);
 

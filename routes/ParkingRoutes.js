@@ -1,19 +1,20 @@
+// routes/parkingRoutes.js
 const express = require('express');
 const router  = express.Router();
 
 const {
   getParkingStatus,
   getParkingBlocks,
-  updateParkingStatus
-} = require('../controllers/ParkingController');
+  updateSlotStatus
+} = require('../controllers/parkingController');
 
-// Overall summary
+// GET  /api/parking/status?institution=…
 router.get('/status', getParkingStatus);
 
-// Block‑by‑block summary
+// GET  /api/parking/blocks?institution=…
 router.get('/blocks', getParkingBlocks);
 
-// IoT (ESP32) posts updates here
-router.post('/update', updateParkingStatus);
+// POST /api/parking/slot   (your IoT will POST slot updates here)
+router.post('/update', updateSlotStatus);
 
 module.exports = router;

@@ -1,53 +1,65 @@
+// controllers/parkingController.js
 const ParkingSlot = require('../models/ParkingSlot');
 
-// GET  /api/parking/status?institution=…
+/**
+ * GET /api/parking/status?institution=…
+ * Returns the overall totals: available vs occupied vs total.
+ */
 exports.getParkingStatus = async (req, res) => {
   try {
-    // we ignore institution for now
-    const result = await ParkingSlot.getOverallSummary();
-    const summary = result[0] || { total: 0, available: 0, occupied: 0 };
-    return res.status(200).json({
-      availableSpots: summary.available,
-      occupiedSpots:  summary.occupied,
-      totalSpots:     summary.total
+    // Run the aggregation you defined in your model
+    const [summary] = await ParkingSlot.getOverallSummary();
+    // If there are no slots yet, summary will be undefined
+    const total     = summary?.total     ?? 0;
+    const available = summary?.available ?? 0;
+    const occupied  = summary?.occupied  ?? 0;
+
+    return res.json({
+      availableSpots: available,
+      occupiedSpots:  occupied,
+      totalSpots:     total
     });
-  } catch (error) {
-    console.error('Error in getParkingStatus:', error);
+  } catch (err) {
+    console.error('Error in getParkingStatus:', err);
     return res.status(500).json({ error: 'Server error' });
   }
 };
 
-// GET  /api/parking/blocks?institution=…
+/**
+ * GET /api/parking/blocks?institution=…
+ * Returns an array of block summaries: { block, total, available, occupied }
+ */
 exports.getParkingBlocks = async (req, res) => {
   try {
+    // Ignore institution for now (or filter if you store it in each record)
     const blocks = await ParkingSlot.getBlockSummary();
-    return res.status(200).json({ blocks });
-  } catch (error) {
-    console.error('Error in getParkingBlocks:', error);
+    return res.json({ blocks });
+  } catch (err) {
+    console.error('Error in getParkingBlocks:', err);
     return res.status(500).json({ error: 'Server error' });
   }
 };
 
-// POST /api/parking/update
-// Body: { slotId: "A3", status: "occupied" }
-exports.updateParkingStatus = async (req, res) => {
+/**
+ * POST /api/parking/slot
+ * Body: { block, slotId, status }
+ * Upserts one slot’s status from your IoT device.
+ */
+exports.updateSlotStatus = async (req, res) => {
+  const { block, slotId, status } = req.body;
+  if (!block || !slotId || !status) {
+    return res.status(400).json({ message: 'Missing block, slotId, or status' });
+  }
+
   try {
-    const { slotId, status } = req.body;
-    if (!slotId || !status) {
-      return res.status(400).json({ message: 'Missing slotId or status' });
-    }
-
-    const block = slotId.charAt(0);
-
-    const updated = await ParkingSlot.findOneAndUpdate(
+    await ParkingSlot.findOneAndUpdate(
       { slotId },
-      { block, status, lastUpdated: new Date() },
+      { block, status, lastUpdated: Date.now() },
       { upsert: true, new: true }
     );
-
-    return res.status(200).json({ message: 'Slot updated', slot: updated });
-  } catch (error) {
-    console.error('Error in updateParkingStatus:', error);
+    return res.json({ message: 'Slot updated' });
+  } catch (err) {
+    console.error('Error in updateSlotStatus:', err);
     return res.status(500).json({ error: 'Server error' });
   }
 };

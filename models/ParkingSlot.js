@@ -1,14 +1,26 @@
+// backend/models/ParkingSlot.js
+
 const mongoose = require('mongoose');
 
 const ParkingSlotSchema = new mongoose.Schema({
-  block:       { type: String, required: true },
-  slotId:      { type: String, required: true, unique: true },
-  status:      {
+  block: {
     type: String,
-    enum: ['vacant', 'occupied', 'error'],
-    default: 'vacant'
+    required: true
   },
-  lastUpdated: { type: Date, default: Date.now }
+  slotId: {
+    type: String,
+    required: true,
+    unique: true
+  },
+  status: {
+    type: String,
+    enum: ['empty', 'occupied', 'error'],   // matches your ESP32 code
+    default: 'empty'
+  },
+  lastUpdated: {
+    type: Date,
+    default: Date.now
+  }
 });
 
 // Static: summary per block
@@ -17,10 +29,10 @@ ParkingSlotSchema.statics.getBlockSummary = function() {
     {
       $group: {
         _id: '$block',
-        total:     { $sum: 1 },
+        total: { $sum: 1 },
         available: {
           $sum: {
-            $cond: [{ $eq: ['$status', 'vacant'] }, 1, 0]
+            $cond: [{ $eq: ['$status', 'empty'] }, 1, 0]
           }
         },
         occupied: {
@@ -32,27 +44,27 @@ ParkingSlotSchema.statics.getBlockSummary = function() {
     },
     {
       $project: {
-        _id:       0,
-        block:     '$_id',
-        total:     1,
+        _id: 0,
+        block: '$_id',
+        total: 1,
         available: 1,
-        occupied:  1
+        occupied: 1
       }
     },
     { $sort: { block: 1 } }
   ]);
 };
 
-// Static: overall parking summary
+// Static: overall parking summary (for /status)
 ParkingSlotSchema.statics.getOverallSummary = function() {
   return this.aggregate([
     {
       $group: {
         _id: null,
-        total:     { $sum: 1 },
+        total: { $sum: 1 },
         available: {
           $sum: {
-            $cond: [{ $eq: ['$status', 'vacant'] }, 1, 0]
+            $cond: [{ $eq: ['$status', 'empty'] }, 1, 0]
           }
         },
         occupied: {
@@ -64,10 +76,10 @@ ParkingSlotSchema.statics.getOverallSummary = function() {
     },
     {
       $project: {
-        _id:       0,
-        total:     1,
+        _id: 0,
+        total: 1,
         available: 1,
-        occupied:  1
+        occupied: 1
       }
     }
   ]);
