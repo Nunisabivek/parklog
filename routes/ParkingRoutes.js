@@ -5,7 +5,7 @@ const {
   getParkingStatus,
   getParkingBlocks,
   updateParkingStatus
-} = require('../controllers/parkingController');
+} = require('../controllers/ParkingController');
 
 // Overall summary
 router.get('/status', getParkingStatus);

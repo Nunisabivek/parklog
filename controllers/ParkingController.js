@@ -1,4 +1,4 @@
-const ParkingSlot = require('../models/parkingSlot');
+const ParkingSlot = require('../models/ParkingSlot');
 
 // GET  /api/parking/status?institution=…
 exports.getParkingStatus = async (req, res) => {
