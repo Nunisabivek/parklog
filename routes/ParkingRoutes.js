@@ -1,17 +1,19 @@
-// backend/routes/ParkingRoutes.js
 const express = require('express');
-const router = express.Router();
+const router  = express.Router();
 
 const {
-  getParkingSummary,    // GET /api/parking/summary
-  updateSlotStatus      // POST /api/parking/update
-} = require('../controllers/ParkingController');
+  getParkingStatus,
+  getParkingBlocks,
+  updateParkingStatus
+} = require('../controllers/parkingController');
 
-// Fetch full summary (all blocks)
-router.get('/summary', getParkingSummary);
+// Overall summary
+router.get('/status', getParkingStatus);
 
-// IoT or simulator POSTS individual slot updates here
-// must be '/update' to match your ESP32 URL
-router.post('/update', updateSlotStatus);
+// Block‑by‑block summary
+router.get('/blocks', getParkingBlocks);
+
+// IoT (ESP32) posts updates here
+router.post('/update', updateParkingStatus);
 
 module.exports = router;
