@@ -15,6 +15,6 @@ router.get('/status', getParkingStatus);
 router.get('/blocks', getParkingBlocks);
 
 // POST /api/parking/slot   (your IoT will POST slot updates here)
-router.post('/update', updateSlotStatus);
+router.post('/slot', updateSlotStatus);
 
 module.exports = router;
