@@ -14,6 +14,11 @@ router.get('/status', getParkingStatus);
 // GET  /api/parking/blocks?institution=…
 router.get('/blocks', getParkingBlocks);
 
+router.get('/slot', (req, res) => {
+  return res.json({ okay: true, note: 'This endpoint only accepts POST in production' });
+});
+
+
 // POST /api/parking/slot   (your IoT will POST slot updates here)
 router.post('/slot', updateSlotStatus);
 
