@@ -6,7 +6,7 @@ const {
   getParkingStatus,
   getParkingBlocks,
   updateSlotStatus
-} = require('../controllers/parkingController');
+} = require('../controllers/ParkingController');
 
 // GET  /api/parking/status?institution=…
 router.get('/status', getParkingStatus);
