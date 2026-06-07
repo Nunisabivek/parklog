@@ -1,0 +1,17 @@
+{
+  "expo": {
+    "name": "ParkLOG",
+    "slug": "parklog",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "scheme": "parklog",
+    "userInterfaceStyle": "light",
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "package": "com.parklog.mobile"
+    }
+  }
+}
