@@ -8,7 +8,7 @@ ParkLOG is a smart IoT parking availability monitoring system for small open par
 - HC-SR04 ultrasonic sensors for vehicle detection.
 - Wi-Fi HTTP communication from device to backend.
 - Node.js/Express backend with MongoDB.
-- React Native mobile app built with Expo and map/list status views.
+- React Native frontend built with Expo for website, iOS, and Android.
 - OTA firmware metadata endpoint for ESP32 updates.
 
 The target user is a visitor who wants to quickly find a vacant slot. A future administrator can manage slots, view analytics, and trigger OTA releases.
@@ -38,10 +38,12 @@ The target user is a visitor who wants to quickly find a vacant slot. A future a
 - Emit live updates through Socket.IO.
 - Keep legacy one-slot firmware route working.
 
-### Mobile App
+### Frontend App And Website
 
-- Cross-platform React Native/Expo app.
-- First screen should be the live parking experience, not a landing page.
+- Cross-platform React Native/Expo codebase.
+- Web opens to a polished product and operations page with the live lot board.
+- iOS/Android open to mobile lot map, list, and alert tabs.
+- The first screen should show concrete parking status, not a generic marketing page.
 - Map/schematic slot view with color-coded status.
 - List view with manual refresh.
 - Vacancy alert subscriptions.
@@ -91,6 +93,46 @@ Yes. This is the intended thesis stack:
 
 The only pieces that still need real deployment configuration are the MongoDB connection string, backend host URL, and ESP32 Wi-Fi credentials.
 
+## 3.2 New Developer Runbook
+
+Docker path:
+
+```bash
+docker compose up
+cd backend
+npm install
+npm run seed
+```
+
+Manual path:
+
+```bash
+cd backend
+cp .env.example .env
+npm install
+npm run seed
+npm run dev
+```
+
+Frontend web:
+
+```bash
+cd frontend
+cp .env.example .env
+npm install
+npm run web
+```
+
+Hardware:
+
+```bash
+cd hardware/esp32/parklog_firmware
+copy config.example.h config.h
+```
+
+Fill `config.h`, flash `parklog_firmware.ino`, and point `PARKLOG_UPDATE_URL` to `/api/slot/update`.
+If `REQUIRE_DEVICE_API_KEY=true`, set `PARKLOG_DEVICE_API_KEY` in firmware to the backend `DEVICE_API_KEY`.
+
 ## 4. Backend API Contract
 
 ### Health
@@ -102,6 +144,8 @@ Returns backend health and uptime.
 ### ESP32 Batch Update
 
 `POST /api/slot/update`
+
+Production device writes can be protected with `REQUIRE_DEVICE_API_KEY=true` and an `x-device-key` header.
 
 ```json
 {
@@ -164,6 +208,8 @@ Returns:
       "block": "A",
       "status": "vacant",
       "occupied": false,
+      "stale": false,
+      "ageSeconds": 4,
       "lastUpdated": "2026-06-07T15:30:00.000Z"
     }
   ]
@@ -246,7 +292,13 @@ Returns:
 
 ## 6. Frontend Plan
 
-### Screens
+### Web Surface
+
+- `WebHomeScreen`: website-grade product page with a live lot board, concrete setup steps, and the actual hardware/backend/mobile system path.
+- Avoid generic AI-style visuals: no abstract gradient hero, no filler claims, no decorative blobs. Use real thesis specifics, operational copy, and parking status data.
+- The web page should help a visitor, investor, or developer understand what ParkLOG does in under a minute.
+
+### Native Screens
 
 - `Map`: summary strip and parking lot schematic. Later replace with `react-native-maps` if exact coordinates are collected.
 - `List`: FlatList of slots with last update times and status badges.
@@ -268,6 +320,16 @@ Returns:
 - Amber: error/fault.
 - Show stale readings clearly once a slot has not updated for a configured timeout.
 - Keep controls thumb-friendly and status-dense.
+
+## 6.1 Scalability Notes
+
+- Multi-lot support already starts with `lotId`.
+- Slot ids are unique per lot through `{ lotId, slotId }`.
+- Current state and event history are separate collections so analytics can grow without slowing status reads.
+- Backend stays stateless except MongoDB, so it can run behind a load balancer later.
+- Socket.IO works for prototype live updates. For multi-server deployments, add a Redis adapter or move device ingest to MQTT.
+- Device writes should use `REQUIRE_DEVICE_API_KEY=true` before any public deployment.
+- Configure `CORS_ORIGIN` to the deployed website/app origins instead of `*`.
 
 ## 7. Hardware Integration Plan
 

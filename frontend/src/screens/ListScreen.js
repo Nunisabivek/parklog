@@ -37,7 +37,7 @@ export default function ListScreen() {
                 {item.lastUpdated ? new Date(item.lastUpdated).toLocaleString() : 'No reading yet'}
               </Text>
             </View>
-            <StatusPill status={item.status} />
+            <StatusPill status={item.status} stale={item.stale} />
           </View>
         )}
       />

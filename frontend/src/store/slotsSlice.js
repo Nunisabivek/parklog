@@ -15,6 +15,8 @@ const demoSlots = Array.from({ length: 12 }, (_, index) => {
     block: 'A',
     status,
     occupied: status === 'occupied',
+    stale: false,
+    ageSeconds: null,
     lastUpdated: null
   };
 });

@@ -1,17 +1,18 @@
 const mongoose = require('mongoose');
+const config = require('../config/env');
 
 const ParkingSlotSchema = new mongoose.Schema(
   {
     lotId: {
       type: String,
       required: true,
-      default: () => process.env.DEFAULT_LOT_ID || 'adtu-main',
+      default: () => config.defaultLotId,
       index: true
     },
     block: {
       type: String,
       required: true,
-      default: 'A',
+      default: () => config.defaultBlock,
       trim: true
     },
     slotNumber: {

@@ -2,14 +2,14 @@ import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { colors } from '../theme';
 
-export default function StatusPill({ status }) {
+export default function StatusPill({ status, stale }) {
   const tone =
-    status === 'vacant' ? colors.vacant : status === 'occupied' ? colors.occupied : colors.warning;
+    stale ? colors.warning : status === 'vacant' ? colors.vacant : status === 'occupied' ? colors.occupied : colors.warning;
 
   return (
     <View style={[styles.pill, { borderColor: tone }]}>
       <View style={[styles.dot, { backgroundColor: tone }]} />
-      <Text style={[styles.text, { color: tone }]}>{status}</Text>
+      <Text style={[styles.text, { color: tone }]}>{stale ? 'stale' : status}</Text>
     </View>
   );
 }

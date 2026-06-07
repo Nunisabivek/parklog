@@ -166,6 +166,10 @@ void postBatch() {
   http.begin(PARKLOG_UPDATE_URL);
   http.addHeader("Content-Type", "application/json");
 
+  if (String(PARKLOG_DEVICE_API_KEY).length() > 0) {
+    http.addHeader("x-device-key", PARKLOG_DEVICE_API_KEY);
+  }
+
   int responseCode = http.POST(body);
   Serial.printf("POST /api/slot/update -> HTTP %d\n", responseCode);
   http.end();

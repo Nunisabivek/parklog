@@ -11,8 +11,9 @@ function SlotTile({ slot }) {
     slot.status === 'vacant' ? colors.vacant : slot.status === 'occupied' ? colors.occupied : colors.warning;
 
   return (
-    <View style={[styles.slot, { borderColor: tone }]}>
+    <View style={[styles.slot, { borderColor: tone }, slot.stale ? styles.staleSlot : null]}>
       <Text style={[styles.slotId, { color: tone }]}>{slot.slotId}</Text>
+      <Text style={styles.slotStatus}>{slot.stale ? 'stale' : slot.status}</Text>
     </View>
   );
 }
@@ -110,6 +111,16 @@ const styles = StyleSheet.create({
   slotId: {
     fontSize: 18,
     fontWeight: '900'
+  },
+  slotStatus: {
+    color: colors.muted,
+    fontSize: 11,
+    marginTop: 4,
+    textTransform: 'capitalize'
+  },
+  staleSlot: {
+    borderColor: colors.warning,
+    borderStyle: 'dashed'
   },
   lane: {
     height: 64,

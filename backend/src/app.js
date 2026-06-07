@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 
+const config = require('./config/env');
 const parkingRoutes = require('./routes/parkingRoutes');
 const slotRoutes = require('./routes/slotRoutes');
 const otaRoutes = require('./routes/otaRoutes');
@@ -9,7 +10,9 @@ const tokenRoutes = require('./routes/tokenRoutes');
 function createApp({ io } = {}) {
   const app = express();
 
-  app.use(cors({ origin: process.env.CORS_ORIGIN || '*' }));
+  app.use(cors({
+    origin: config.corsOrigins.includes('*') ? '*' : config.corsOrigins
+  }));
   app.use(express.json({ limit: '256kb' }));
   app.use(express.urlencoded({ extended: true }));
 
@@ -22,13 +25,15 @@ function createApp({ io } = {}) {
     res.json({
       service: 'ParkLOG backend',
       status: 'ok',
-      docs: '/api/parking/status'
+      docs: '/api/parking/status',
+      lotId: config.defaultLotId
     });
   });
 
   app.get('/health', (req, res) => {
     res.json({
       status: 'ok',
+      lotId: config.defaultLotId,
       uptimeSeconds: Math.round(process.uptime()),
       timestamp: new Date().toISOString()
     });

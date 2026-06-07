@@ -1,8 +1,27 @@
 const ParkingSlot = require('../models/ParkingSlot');
+const config = require('../config/env');
 const { applySlotBatch, summarizeSlots } = require('../services/slotService');
 
 function getLotId(req) {
-  return req.query.lotId || req.body?.lotId || process.env.DEFAULT_LOT_ID || 'adtu-main';
+  return req.query.lotId || req.body?.lotId || config.defaultLotId;
+}
+
+function serializeSlot(slot) {
+  const lastUpdated = slot.lastSeenAt || slot.updatedAt;
+  const ageSeconds = lastUpdated
+    ? Math.max(0, Math.round((Date.now() - new Date(lastUpdated).getTime()) / 1000))
+    : null;
+
+  return {
+    id: slot.slotNumber,
+    slotId: slot.slotId,
+    block: slot.block,
+    status: slot.status,
+    occupied: slot.status === 'occupied',
+    stale: ageSeconds === null || ageSeconds > config.staleAfterSeconds,
+    ageSeconds,
+    lastUpdated
+  };
 }
 
 async function getParkingStatus(req, res, next) {
@@ -15,14 +34,8 @@ async function getParkingStatus(req, res, next) {
     res.json({
       lotId,
       summary: summarizeSlots(slots),
-      slots: slots.map(slot => ({
-        id: slot.slotNumber,
-        slotId: slot.slotId,
-        block: slot.block,
-        status: slot.status,
-        occupied: slot.status === 'occupied',
-        lastUpdated: slot.lastSeenAt || slot.updatedAt
-      }))
+      staleAfterSeconds: config.staleAfterSeconds,
+      slots: slots.map(serializeSlot)
     });
   } catch (err) {
     next(err);

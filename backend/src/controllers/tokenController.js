@@ -1,11 +1,14 @@
 const UserToken = require('../models/UserToken');
+const config = require('../config/env');
+
+const allowedPlatforms = new Set(['ios', 'android', 'web', 'unknown']);
 
 async function registerToken(req, res, next) {
   try {
     const {
       token,
       platform = 'unknown',
-      lotId = process.env.DEFAULT_LOT_ID || 'adtu-main',
+      lotId = config.defaultLotId,
       subscribedSlotIds = []
     } = req.body;
 
@@ -16,7 +19,7 @@ async function registerToken(req, res, next) {
     const saved = await UserToken.findOneAndUpdate(
       { token },
       {
-        platform,
+        platform: allowedPlatforms.has(platform) ? platform : 'unknown',
         lotId,
         subscribedSlotIds,
         lastSeenAt: new Date()

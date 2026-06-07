@@ -4,14 +4,15 @@ const http = require('http');
 const { Server } = require('socket.io');
 
 const createApp = require('./app');
+const config = require('./config/env');
 const connectDatabase = require('./config/database');
 
 async function start() {
-  await connectDatabase(process.env.MONGO_URI);
+  await connectDatabase(config.mongoUri);
 
   const server = http.createServer();
   const io = new Server(server, {
-    cors: { origin: process.env.CORS_ORIGIN || '*' }
+    cors: { origin: config.corsOrigins.includes('*') ? '*' : config.corsOrigins }
   });
 
   io.on('connection', socket => {
@@ -21,9 +22,8 @@ async function start() {
   const app = createApp({ io });
   server.on('request', app);
 
-  const port = Number(process.env.PORT || 5000);
-  server.listen(port, '0.0.0.0', () => {
-    console.log(`ParkLOG API listening on port ${port}`);
+  server.listen(config.port, '0.0.0.0', () => {
+    console.log(`ParkLOG API listening on port ${config.port}`);
   });
 }
 

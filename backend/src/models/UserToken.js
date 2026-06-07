@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const config = require('../config/env');
 
 const UserTokenSchema = new mongoose.Schema(
   {
@@ -16,7 +17,7 @@ const UserTokenSchema = new mongoose.Schema(
     lotId: {
       type: String,
       required: true,
-      default: () => process.env.DEFAULT_LOT_ID || 'adtu-main'
+      default: () => config.defaultLotId
     },
     subscribedSlotIds: {
       type: [String],

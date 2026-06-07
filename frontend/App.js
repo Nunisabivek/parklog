@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { Platform } from 'react-native';
 import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Provider, useDispatch } from 'react-redux';
@@ -10,11 +11,12 @@ import { fetchSlots, subscribeToLiveUpdates } from './src/store/slotsSlice';
 import MapScreen from './src/screens/MapScreen';
 import ListScreen from './src/screens/ListScreen';
 import AlertsScreen from './src/screens/AlertsScreen';
+import WebHomeScreen from './src/screens/WebHomeScreen';
 import { colors } from './src/theme';
 
 const Tab = createBottomTabNavigator();
 
-function RootTabs() {
+function Boot({ children }) {
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -23,6 +25,10 @@ function RootTabs() {
     return unsubscribe;
   }, [dispatch]);
 
+  return children;
+}
+
+function RootTabs() {
   return (
     <Tab.Navigator
       screenOptions={{
@@ -75,10 +81,16 @@ const theme = {
 export default function App() {
   return (
     <Provider store={store}>
-      <NavigationContainer theme={theme}>
+      <Boot>
         <StatusBar style="dark" />
-        <RootTabs />
-      </NavigationContainer>
+        {Platform.OS === 'web' ? (
+          <WebHomeScreen />
+        ) : (
+          <NavigationContainer theme={theme}>
+            <RootTabs />
+          </NavigationContainer>
+        )}
+      </Boot>
     </Provider>
   );
 }

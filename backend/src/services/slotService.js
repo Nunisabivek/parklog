@@ -1,6 +1,7 @@
 const ParkingSlot = require('../models/ParkingSlot');
 const Device = require('../models/Device');
 const OccupancyEvent = require('../models/OccupancyEvent');
+const config = require('../config/env');
 
 function normalizeStatus(value) {
   if (value === true || value === 1 || value === '1') return 'occupied';
@@ -54,7 +55,7 @@ function parseBatchPayload(payload) {
     });
   }
 
-  const lotId = payload.lotId || payload.lot_id || process.env.DEFAULT_LOT_ID || 'adtu-main';
+  const lotId = payload.lotId || payload.lot_id || config.defaultLotId;
   const deviceId = payload.device_id || payload.deviceId || payload.device || 'unknown-device';
   const observedAt = payload.timestamp
     ? new Date(Number(payload.timestamp) * 1000)
@@ -73,7 +74,7 @@ function parseBatchPayload(payload) {
     observedAt,
     slots: slots.map(slot => {
       const slotIdentity = buildSlotId({
-        block: slot.block || payload.block || 'A',
+        block: slot.block || payload.block || config.defaultBlock,
         slotNumber: slot.slotNumber,
         id: slot.id
       });

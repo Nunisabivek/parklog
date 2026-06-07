@@ -12,6 +12,10 @@
 #define PARKLOG_LOT_ID "adtu-main"
 #define PARKLOG_BLOCK "A"
 
+// Leave empty while REQUIRE_DEVICE_API_KEY=false on the backend.
+// In production, set REQUIRE_DEVICE_API_KEY=true and paste the same key here.
+#define PARKLOG_DEVICE_API_KEY ""
+
 // Distance threshold from thesis prototype: below 50 cm means occupied.
 #define OCCUPIED_THRESHOLD_CM 50
 
