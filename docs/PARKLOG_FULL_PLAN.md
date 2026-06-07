@@ -8,7 +8,7 @@ ParkLOG is a smart IoT parking availability monitoring system for small open par
 - HC-SR04 ultrasonic sensors for vehicle detection.
 - Wi-Fi HTTP communication from device to backend.
 - Node.js/Express backend with MongoDB.
-- React Native mobile app with map/list status views.
+- React Native mobile app built with Expo and map/list status views.
 - OTA firmware metadata endpoint for ESP32 updates.
 
 The target user is a visitor who wants to quickly find a vacant slot. A future administrator can manage slots, view analytics, and trigger OTA releases.
@@ -68,9 +68,28 @@ parklog/
       components/
       screens/
       store/
+  hardware/
+    esp32/
+      parklog_firmware/
+        config.example.h
+        parklog_firmware.ino
   docs/
     PARKLOG_FULL_PLAN.md
 ```
+
+## 3.1 Does This Stack Work Together?
+
+Yes. This is the intended thesis stack:
+
+1. The ESP32 reads HC-SR04 ultrasonic sensor distances.
+2. Firmware converts each distance to `vacant`, `occupied`, or `error`.
+3. ESP32 posts a JSON batch to the Express backend.
+4. Express validates the payload and writes the latest slot states to MongoDB.
+5. MongoDB stores current slot status, device metadata, and historical occupancy events.
+6. Socket.IO emits changed slots to the Expo React Native app.
+7. The mobile app also polls `GET /api/parking/status` so it still works if live sockets fail.
+
+The only pieces that still need real deployment configuration are the MongoDB connection string, backend host URL, and ESP32 Wi-Fi credentials.
 
 ## 4. Backend API Contract
 
@@ -275,6 +294,23 @@ Returns:
    - compare version
    - verify checksum
    - download firmware from `url`
+
+### Hardware Workspace
+
+Use `hardware/esp32/parklog_firmware/` for device code.
+
+- `config.example.h`: safe template for Wi-Fi, backend URL, device id, lot id, and threshold.
+- `config.h`: local private file copied from the example and ignored by Git.
+- `parklog_firmware.ino`: Arduino IDE compatible ESP32 firmware based on the thesis appendix.
+
+The current firmware keeps the thesis GPIO examples:
+
+| Slot | TRIG | ECHO |
+| --- | ---: | ---: |
+| A1 | 2 | 4 |
+| A2 | 5 | 18 |
+
+Extend the `slots[]` array after confirming the final ESP32 pin map for 10-15 sensors. ECHO pins must go through a divider or level shifter because HC-SR04 ECHO is 5 V and ESP32 GPIO is 3.3 V.
 
 ## 8. Immediate Next Improvements
 
