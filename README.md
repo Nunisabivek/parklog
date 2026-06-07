@@ -7,7 +7,7 @@ ParkLOG is a thesis prototype for a smart IoT parking availability system. It co
 ```text
 parklog/
   backend/   Express API, MongoDB models, Socket.IO live updates, OTA metadata
-  frontend/  Expo React Native web and mobile frontend
+  frontend/  Expo React Native parking application for web, iOS, and Android
   hardware/  ESP32 Arduino firmware and safe device config template
   docs/      One thesis-derived product, backend, frontend, and hardware plan
 ```
@@ -29,13 +29,21 @@ Yes, this stack matches the thesis: Expo/React Native for the cross-platform app
 - Mobile: React Native app with map/list views, refresh, offline cached status, and slot alerts.
 - OTA: ESP32 checks latest firmware metadata and downloads signed firmware binaries.
 
+## System Flow
+
+```text
+Parking spot sensor -> ESP32 firmware -> Backend/cloud API -> MongoDB -> React Native app
+```
+
+The frontend does not invent parking availability. It renders live data from `GET /api/parking/status` and Socket.IO updates after the backend has records from hardware or an optional local development seed.
+
 ## Quick Start With Docker
 
 ```bash
 docker compose up
 ```
 
-Then seed demo parking slots:
+Optional local development seed:
 
 ```bash
 cd backend
@@ -51,13 +59,14 @@ Backend health check: `http://localhost:5000/health`
 cd backend
 cp .env.example .env
 npm install
-npm run seed
 npm run dev
 ```
 
 Set `MONGO_URI` in `backend/.env` to local MongoDB or MongoDB Atlas. In production, set `REQUIRE_DEVICE_API_KEY=true` and copy `DEVICE_API_KEY` into the ESP32 `config.h`.
 
-## Frontend Website And App
+If you do not have hardware connected yet, run `npm run seed` once to create local development slots. Do not use seeded data as production occupancy.
+
+## Frontend App
 
 ```bash
 cd frontend

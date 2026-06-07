@@ -29,6 +29,14 @@ export default function ListScreen() {
         refreshing={loading}
         onRefresh={() => dispatch(fetchSlots())}
         contentContainerStyle={styles.list}
+        ListEmptyComponent={
+          <View style={styles.emptyState}>
+            <Text style={styles.emptyTitle}>No slots received</Text>
+            <Text style={styles.emptyText}>
+              Slot rows appear after the backend receives readings from the parking hardware.
+            </Text>
+          </View>
+        }
         renderItem={({ item }) => (
           <View style={styles.row}>
             <View>
@@ -100,5 +108,22 @@ const styles = StyleSheet.create({
     color: colors.muted,
     marginTop: 4,
     fontSize: 12
+  },
+  emptyState: {
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
+    padding: 16
+  },
+  emptyTitle: {
+    color: colors.ink,
+    fontSize: 18,
+    fontWeight: '900'
+  },
+  emptyText: {
+    color: colors.muted,
+    marginTop: 6,
+    lineHeight: 21
   }
 });

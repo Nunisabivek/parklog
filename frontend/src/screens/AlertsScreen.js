@@ -1,22 +1,22 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { FlatList, Pressable, StyleSheet, Switch, Text, View } from 'react-native';
 import { Save } from 'lucide-react-native';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { registerToken } from '../api/client';
 import { toggleSlotSubscription } from '../store/slotsSlice';
 import { colors } from '../theme';
 
 export default function AlertsScreen() {
   const dispatch = useDispatch();
   const { slots, subscribedSlotIds } = useSelector(state => state.slots);
+  const [message, setMessage] = useState('Select slots to prepare vacancy alerts on this device.');
 
-  async function save() {
-    await registerToken({
-      token: 'development-token',
-      platform: 'unknown',
-      subscribedSlotIds
-    });
+  function save() {
+    setMessage(
+      subscribedSlotIds.length
+        ? 'Selections saved locally. Push delivery needs Expo Notifications or FCM token setup.'
+        : 'No slots selected yet.'
+    );
   }
 
   return (
@@ -27,10 +27,19 @@ export default function AlertsScreen() {
           <Save color={colors.ink} size={20} />
         </Pressable>
       </View>
+      <Text style={styles.message}>{message}</Text>
       <FlatList
         data={slots}
         keyExtractor={item => item.slotId}
         contentContainerStyle={styles.list}
+        ListEmptyComponent={
+          <View style={styles.emptyState}>
+            <Text style={styles.emptyTitle}>No alertable slots</Text>
+            <Text style={styles.emptyText}>
+              Vacancy alerts become available after live slot records are created by the backend.
+            </Text>
+          </View>
+        }
         renderItem={({ item }) => {
           const enabled = subscribedSlotIds.includes(item.slotId);
           return (
@@ -87,6 +96,15 @@ const styles = StyleSheet.create({
     padding: 12,
     gap: 10
   },
+  message: {
+    color: colors.muted,
+    backgroundColor: colors.surface,
+    borderBottomWidth: 1,
+    borderColor: colors.border,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    lineHeight: 20
+  },
   row: {
     minHeight: 68,
     borderRadius: 8,
@@ -107,5 +125,22 @@ const styles = StyleSheet.create({
     color: colors.muted,
     marginTop: 4,
     textTransform: 'capitalize'
+  },
+  emptyState: {
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
+    padding: 16
+  },
+  emptyTitle: {
+    color: colors.ink,
+    fontSize: 18,
+    fontWeight: '900'
+  },
+  emptyText: {
+    color: colors.muted,
+    marginTop: 6,
+    lineHeight: 21
   }
 });

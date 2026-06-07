@@ -8,7 +8,7 @@ ParkLOG is a smart IoT parking availability monitoring system for small open par
 - HC-SR04 ultrasonic sensors for vehicle detection.
 - Wi-Fi HTTP communication from device to backend.
 - Node.js/Express backend with MongoDB.
-- React Native frontend built with Expo for website, iOS, and Android.
+- React Native application built with Expo for web, iOS, and Android.
 - OTA firmware metadata endpoint for ESP32 updates.
 
 The target user is a visitor who wants to quickly find a vacant slot. A future administrator can manage slots, view analytics, and trigger OTA releases.
@@ -38,12 +38,12 @@ The target user is a visitor who wants to quickly find a vacant slot. A future a
 - Emit live updates through Socket.IO.
 - Keep legacy one-slot firmware route working.
 
-### Frontend App And Website
+### Frontend Application
 
 - Cross-platform React Native/Expo codebase.
-- Web opens to a polished product and operations page with the live lot board.
-- iOS/Android open to mobile lot map, list, and alert tabs.
-- The first screen should show concrete parking status, not a generic marketing page.
+- Web, iOS, and Android open to the same parking application.
+- The first screen should show real parking status or an honest waiting state when no hardware data exists.
+- The app must not invent availability data.
 - Map/schematic slot view with color-coded status.
 - List view with manual refresh.
 - Vacancy alert subscriptions.
@@ -93,7 +93,29 @@ Yes. This is the intended thesis stack:
 
 The only pieces that still need real deployment configuration are the MongoDB connection string, backend host URL, and ESP32 Wi-Fi credentials.
 
-## 3.2 New Developer Runbook
+## 3.2 System Architecture
+
+```mermaid
+flowchart LR
+  A["Parking spot"] --> B["HC-SR04 ultrasonic sensor"]
+  B --> C["ESP32-WROOM-32 firmware"]
+  C -->|"HTTP JSON batch /api/slot/update"| D["Backend/cloud API"]
+  D --> E["MongoDB"]
+  D -->|"Socket.IO parking:update"| F["React Native app"]
+  F -->|"GET /api/parking/status"| D
+  D --> G["OTA metadata /api/ota/latest"]
+  G --> C
+```
+
+Data contract:
+
+1. The hardware is installed at parking spots.
+2. The ESP32 reads sensor distance and converts it to `vacant`, `occupied`, or `error`.
+3. The ESP32 sends one batch payload to the backend.
+4. The backend validates the payload, updates MongoDB, and records occupancy events.
+5. The React Native app renders only backend data. If MongoDB has no slot records, the UI shows a waiting state.
+
+## 3.3 New Developer Runbook
 
 Docker path:
 
@@ -101,8 +123,9 @@ Docker path:
 docker compose up
 cd backend
 npm install
-npm run seed
 ```
+
+Use `npm run seed` only when you need local development slots before hardware is connected.
 
 Manual path:
 
@@ -110,7 +133,6 @@ Manual path:
 cd backend
 cp .env.example .env
 npm install
-npm run seed
 npm run dev
 ```
 
@@ -292,13 +314,7 @@ Returns:
 
 ## 6. Frontend Plan
 
-### Web Surface
-
-- `WebHomeScreen`: website-grade product page with a live lot board, concrete setup steps, and the actual hardware/backend/mobile system path.
-- Avoid generic AI-style visuals: no abstract gradient hero, no filler claims, no decorative blobs. Use real thesis specifics, operational copy, and parking status data.
-- The web page should help a visitor, investor, or developer understand what ParkLOG does in under a minute.
-
-### Native Screens
+### App Screens
 
 - `Map`: summary strip and parking lot schematic. Later replace with `react-native-maps` if exact coordinates are collected.
 - `List`: FlatList of slots with last update times and status badges.
@@ -311,7 +327,7 @@ Returns:
 - Redux Toolkit slice for slot data.
 - Fetch `GET /api/parking/status` on launch and pull-to-refresh.
 - Listen to Socket.IO `parking:update` for changed slots.
-- Store alert subscriptions locally and register them with backend.
+- Store alert subscriptions locally until Expo Notifications or FCM token registration is wired.
 
 ### Mobile UX
 
@@ -319,6 +335,7 @@ Returns:
 - Red: occupied.
 - Amber: error/fault.
 - Show stale readings clearly once a slot has not updated for a configured timeout.
+- Show an empty/waiting state when no real slot records exist.
 - Keep controls thumb-friendly and status-dense.
 
 ## 6.1 Scalability Notes
@@ -395,7 +412,7 @@ You are working on ParkLOG, an IoT smart parking monorepo. Read docs/PARKLOG_FUL
 1. Add backend integration tests using a disposable MongoDB test database.
 2. Add API-key auth for ESP32 device writes.
 3. Add stale-slot detection and return stale=true when lastSeenAt is older than a configured threshold.
-4. Replace the frontend development token with Expo Notifications token registration.
+4. Add Expo Notifications or FCM token registration for real vacancy push alerts.
 5. Add cached offline slot status in the frontend.
 6. Update docs and run all tests.
 ```

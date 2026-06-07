@@ -5,26 +5,10 @@ export const fetchSlots = createAsyncThunk('slots/fetchSlots', async () => {
   return getParkingStatus();
 });
 
-const demoSlots = Array.from({ length: 12 }, (_, index) => {
-  const slotNumber = index + 1;
-  const status = [2, 5, 9].includes(slotNumber) ? 'occupied' : 'vacant';
-
-  return {
-    id: slotNumber,
-    slotId: `A${slotNumber}`,
-    block: 'A',
-    status,
-    occupied: status === 'occupied',
-    stale: false,
-    ageSeconds: null,
-    lastUpdated: null
-  };
-});
-
 const initialState = {
   lotId: 'adtu-main',
-  slots: demoSlots,
-  summary: { total: 12, vacant: 9, occupied: 3, error: 0 },
+  slots: [],
+  summary: { total: 0, vacant: 0, occupied: 0, error: 0 },
   loading: false,
   error: null,
   lastUpdatedAt: null,
